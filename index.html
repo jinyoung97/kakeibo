@@ -58,9 +58,13 @@
   .toast.show{opacity:1}
   .save-indicator{font-size:11px;color:#aaa;display:flex;align-items:center;gap:4px}
   .save-dot{width:6px;height:6px;border-radius:50%;background:#1D9E75;display:inline-block}
-  .hint-card{background:#f9f9f7;border:1px dashed #ddd;border-radius:10px;padding:14px 16px;margin-bottom:14px}
-  .hint-card .card-title{margin-bottom:8px}
   code{font-family:'Courier New',monospace;font-size:12px;background:#eee;padding:2px 6px;border-radius:4px;color:#555}
+  .help-wrap{position:relative;display:inline-flex;align-items:center}
+  .help-btn{width:22px;height:22px;border-radius:50%;border:1.5px solid #bbb;background:#fff;color:#888;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;line-height:1;transition:all 0.15s;flex-shrink:0}
+  .help-btn:hover{border-color:#1D9E75;color:#1D9E75;background:#f0faf6}
+  .help-tooltip{display:none;position:absolute;top:30px;right:0;width:300px;background:#fff;border:1px solid #e0e0e0;border-radius:10px;padding:14px 16px;font-size:12px;color:#555;line-height:2;box-shadow:0 4px 20px rgba(0,0,0,0.1);z-index:100}
+  .help-tooltip.visible{display:block}
+  .help-tooltip::before{content:'';position:absolute;top:-6px;right:8px;width:10px;height:10px;background:#fff;border-left:1px solid #e0e0e0;border-top:1px solid #e0e0e0;transform:rotate(45deg)}
   .legend-row{display:flex;gap:14px;margin-bottom:8px;font-size:12px;color:#888}
   .legend-dot{width:10px;height:10px;border-radius:2px;display:inline-block;margin-right:4px;vertical-align:middle}
   @media(max-width:700px){
@@ -86,11 +90,21 @@
       </div>
     </div>
     <div class="top-actions">
-      <label class="btn-import">
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2v8M5 7l3 3 3-3"/><path d="M3 12v1h10v-1"/></svg>
-        CSV 가져오기
-        <input type="file" id="csv-file-input" accept=".csv" style="display:none" onchange="importCSV(this)"/>
-      </label>
+      <div class="help-wrap">
+       <button class="help-btn" id="help-btn" onclick="toggleHelp()" title="CSV 형식 안내">?</button>
+        <label class="btn-import">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2v8M5 7l3 3 3-3"/><path d="M3 12v1h10v-1"/></svg>
+          CSV 가져오기
+          <input type="file" id="csv-file-input" accept=".csv" style="display:none" onchange="importCSV(this)"/>
+        </label>
+        <div class="help-tooltip" id="help-tooltip">
+          <strong style="color:#333;font-size:12px">CSV 형식 안내</strong><br>
+          컬럼 순서: <code>날짜, 항목명, 금액, 카테고리, 구분</code><br>
+          예시: <code>2026-02-01, 월급, 3200000, 월급, income</code><br>
+          구분 값: <code>income</code> (수입) / <code>expense</code> (지출)<br>
+          <span style="color:#aaa">첫 행이 헤더이면 자동으로 건너뜁니다.</span>
+        </div>
+      </div>
       <button class="btn-export" onclick="exportCSV()">
         <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#fff" stroke-width="1.5"><path d="M8 10V2M5 5l3-3 3 3"/><path d="M3 12v1h10v-1"/></svg>
         CSV 내보내기
@@ -189,14 +203,7 @@
     </div>
   </div>
 
-  <div class="hint-card">
-    <div class="card-title">CSV 형식 안내</div>
-    <p style="font-size:12px;color:#888;line-height:2">
-      컬럼 순서: <code>날짜, 항목명, 금액, 카테고리, 구분</code><br>
-      예시: <code>2026-02-01, 월급, 3200000, 월급, income</code><br>
-      구분 값: <code>income</code> (수입) 또는 <code>expense</code> (지출) &nbsp;·&nbsp; 첫 행이 헤더이면 자동으로 건너뜁니다.
-    </p>
-  </div>
+
 
 </div>
 
@@ -216,27 +223,7 @@ function loadData(){
       }
     }
   }catch(e){}
-  return{
-    entries:[
-      {id:1,date:'2026-02-01',name:'2월 월급',amount:3200000,cat:'월급',type:'income'},
-      {id:2,date:'2026-02-03',name:'마트 장보기',amount:87000,cat:'식비',type:'expense'},
-      {id:3,date:'2026-02-05',name:'지하철 충전',amount:50000,cat:'교통',type:'expense'},
-      {id:4,date:'2026-02-07',name:'카페',amount:24000,cat:'식비',type:'expense'},
-      {id:5,date:'2026-02-10',name:'인터넷 요금',amount:33000,cat:'통신비',type:'expense'},
-      {id:6,date:'2026-02-12',name:'쇼핑몰 구매',amount:145000,cat:'쇼핑',type:'expense'},
-      {id:7,date:'2026-02-14',name:'병원비',amount:32000,cat:'의료',type:'expense'},
-      {id:8,date:'2026-02-16',name:'영화',amount:28000,cat:'여가',type:'expense'},
-      {id:9,date:'2026-02-18',name:'점심 식사',amount:18000,cat:'식비',type:'expense'},
-      {id:10,date:'2026-02-20',name:'택시',amount:12000,cat:'교통',type:'expense'},
-      {id:11,date:'2026-02-22',name:'부업 수입',amount:300000,cat:'부업',type:'income'},
-      {id:12,date:'2026-01-01',name:'1월 월급',amount:3200000,cat:'월급',type:'income'},
-      {id:13,date:'2026-01-05',name:'식료품',amount:95000,cat:'식비',type:'expense'},
-      {id:14,date:'2026-01-10',name:'교통카드',amount:60000,cat:'교통',type:'expense'},
-      {id:15,date:'2026-01-15',name:'의류 구매',amount:220000,cat:'쇼핑',type:'expense'},
-      {id:16,date:'2026-01-20',name:'외식',amount:55000,cat:'식비',type:'expense'},
-    ],
-    nextId:17
-  };
+  return{entries:[],nextId:1};
 }
 
 const saved=loadData();
@@ -373,15 +360,31 @@ function renderTop10(f){
 
 function renderMonthlyChart(){
   const yr=document.getElementById('sel-year').value||String(today.getFullYear());
-  const inc=Array(12).fill(0),exp=Array(12).fill(0);
+  const incMap={},expMap={};
   entries.filter(e=>!yr||e.date.startsWith(yr)).forEach(e=>{
-    const m=parseInt(e.date.slice(5,7))-1;
-    if(e.type==='income')inc[m]+=e.amount;else exp[m]+=e.amount;
+    const m=parseInt(e.date.slice(5,7));
+    if(e.type==='income')incMap[m]=(incMap[m]||0)+e.amount;
+    else expMap[m]=(expMap[m]||0)+e.amount;
   });
+  const activeMonths=[...new Set([...Object.keys(incMap),...Object.keys(expMap)])].map(Number).sort((a,b)=>a-b);
   if(monthlyChart){monthlyChart.destroy();monthlyChart=null;}
+  const el=document.getElementById('chart-monthly');
+  const wrap=el.parentElement;
+  if(!activeMonths.length){
+    wrap.innerHTML='<p style="font-size:13px;color:#aaa;padding:20px 0;text-align:center">해당 연도의 데이터가 없습니다.</p>';
+    return;
+  }
+  if(!document.getElementById('chart-monthly')){
+    wrap.innerHTML='<canvas id="chart-monthly" role="img" aria-label="월별 수입/지출 막대 차트">월별 수입/지출</canvas>';
+  }
+  const labels=activeMonths.map(m=>m+'월');
+  const inc=activeMonths.map(m=>incMap[m]||0);
+  const exp=activeMonths.map(m=>expMap[m]||0);
   monthlyChart=new Chart(document.getElementById('chart-monthly'),{type:'bar',
-    data:{labels:['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'],
-      datasets:[{label:'수입',data:inc,backgroundColor:'#1D9E75',borderRadius:3,borderSkipped:false},{label:'지출',data:exp,backgroundColor:'#E24B4A',borderRadius:3,borderSkipped:false}]},
+    data:{labels,datasets:[
+      {label:'수입',data:inc,backgroundColor:'#1D9E75',borderRadius:3,borderSkipped:false},
+      {label:'지출',data:exp,backgroundColor:'#E24B4A',borderRadius:3,borderSkipped:false}
+    ]},
     options:{responsive:true,maintainAspectRatio:false,
       plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+fmt(c.raw)}}},
       scales:{x:{ticks:{font:{size:11},autoSkip:false,maxRotation:0},grid:{display:false}},y:{ticks:{callback:v=>'₩'+(v/10000)+'만',font:{size:11}},grid:{color:'rgba(0,0,0,0.04)'}}}}
@@ -417,6 +420,17 @@ function delEntry(id){
   entries=entries.filter(e=>e.id!==id);
   saveData();applyFilter();
 }
+
+function toggleHelp(){
+  const tt=document.getElementById('help-tooltip');
+  tt.classList.toggle('visible');
+}
+document.addEventListener('click',function(e){
+  const wrap=document.querySelector('.help-wrap');
+  if(wrap&&!wrap.contains(e.target)){
+    document.getElementById('help-tooltip').classList.remove('visible');
+  }
+});
 
 initSelectors();
 document.getElementById('sel-month').value=today.getMonth()+1;
